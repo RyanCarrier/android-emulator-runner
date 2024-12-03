@@ -21,7 +21,7 @@ import { parseScript } from './script-parser';
 import { getChannelId } from './channel-id-mapper';
 import { accessSync, constants } from 'fs';
 
-async function run() {
+async function run(): Promise<void> {
   let port: number = MIN_PORT;
   try {
     console.log(`::group::Configure emulator`);
@@ -233,29 +233,29 @@ async function run() {
       core.setFailed(error instanceof Error ? error.message : (error as string));
     }
 
-    if (scripts.length > 0) {
-      // execute the custom script
-      try {
-        // move to custom working directory if set
-        if (workingDirectory) {
-          process.chdir(workingDirectory);
-        }
-        for (const script of scripts) {
-          // use array form to avoid various quote escaping problems
-          // caused by exec(`sh -c "${script}"`)
-          await exec.exec('sh', ['-c', script], {
-            env: { ...process.env, EMULATOR_PORT: `${port}`, ANDROID_SERIAL: `emulator-${port}` },
-          });
-        }
-      } catch (error) {
-        core.setFailed(error instanceof Error ? error.message : (error as string));
-      }
-
-      // finally kill the emulator
-      await killEmulator(port);
-    } else {
+    if (scripts.length === 0) {
       console.log('No custom script to run.');
+      core.saveState('post', 'true');
+      process.exit(0);
     }
+    try {
+      // move to custom working directory if set
+      if (workingDirectory) {
+        process.chdir(workingDirectory);
+      }
+      for (const script of scripts) {
+        // use array form to avoid various quote escaping problems
+        // caused by exec(`sh -c "${script}"`)
+        await exec.exec('sh', ['-c', script], {
+          env: { ...process.env, EMULATOR_PORT: `${port}`, ANDROID_SERIAL: `emulator-${port}` },
+        });
+      }
+    } catch (error) {
+      core.setFailed(error instanceof Error ? error.message : (error as string));
+    }
+
+    // finally kill the emulator
+    await killEmulator(port);
   } catch (error) {
     // kill the emulator so the action can exit
     await killEmulator(port);
@@ -263,4 +263,33 @@ async function run() {
   }
 }
 
-run();
+async function post() {
+  let port: number = MIN_PORT;
+  // Emulator port to use
+  port = parseInt(core.getInput('emulator-port'), 10);
+  checkPort(port);
+  console.log(`emulator port: ${port}`);
+  try {
+    let result = '';
+    await exec.exec(`adb -s emulator-${port} shell getprop sys.boot_completed`, [], {
+      listeners: {
+        stdout: (data: Buffer) => {
+          result += data.toString();
+        },
+      },
+    });
+    if (result.trim() === '1') {
+      console.log('Emulator online, killing it.');
+      await killEmulator(port);
+    }
+  } catch (error) {
+    await killEmulator(port);
+    console.warn(error instanceof Error ? error.message : error);
+  }
+}
+
+if (core.getState('post')) {
+  post();
+} else {
+  run();
+}

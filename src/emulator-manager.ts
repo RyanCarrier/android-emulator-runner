@@ -81,13 +81,13 @@ export async function launchEmulator(
     const result = await execWithRetry(
       () =>
         exec.exec(`sh -c \\"${process.env.ANDROID_HOME}/emulator/emulator -port ${port} -avd "${avdName}" ${emulatorOptions} &"`, [], {
-          // listeners: {
-          //   stderr: (data: Buffer) => {
-          //     if (data.toString().includes('invalid command-line parameter')) {
-          //       throw new Error(data.toString());
-          //     }
-          //   },
-          // },
+          listeners: {
+            stderr: (data: Buffer) => {
+              if (data.toString().includes('invalid command-line parameter')) {
+                throw new Error(data.toString());
+              }
+            },
+          },
         }),
 
       retryCount
