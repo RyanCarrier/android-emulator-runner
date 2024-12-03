@@ -233,30 +233,29 @@ async function run() {
       core.setFailed(error instanceof Error ? error.message : (error as string));
     }
 
-    if (scripts.length === 0) {
+    if (scripts.length > 0) {
+      // execute the custom script
+      try {
+        // move to custom working directory if set
+        if (workingDirectory) {
+          process.chdir(workingDirectory);
+        }
+        for (const script of scripts) {
+          // use array form to avoid various quote escaping problems
+          // caused by exec(`sh -c "${script}"`)
+          await exec.exec('sh', ['-c', script], {
+            env: { ...process.env, EMULATOR_PORT: `${port}`, ANDROID_SERIAL: `emulator-${port}` },
+          });
+        }
+      } catch (error) {
+        core.setFailed(error instanceof Error ? error.message : (error as string));
+      }
+
+      // finally kill the emulator
+      await killEmulator(port);
+    } else {
       console.log('No custom script to run.');
-      return;
     }
-
-    // execute the custom script
-    try {
-      // move to custom working directory if set
-      if (workingDirectory) {
-        process.chdir(workingDirectory);
-      }
-      for (const script of scripts) {
-        // use array form to avoid various quote escaping problems
-        // caused by exec(`sh -c "${script}"`)
-        await exec.exec('sh', ['-c', script], {
-          env: { ...process.env, EMULATOR_PORT: `${port}`, ANDROID_SERIAL: `emulator-${port}` },
-        });
-      }
-    } catch (error) {
-      core.setFailed(error instanceof Error ? error.message : (error as string));
-    }
-
-    // finally kill the emulator
-    await killEmulator(port);
   } catch (error) {
     // kill the emulator so the action can exit
     await killEmulator(port);
