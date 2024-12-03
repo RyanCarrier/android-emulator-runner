@@ -168,7 +168,7 @@ async function run(): Promise<void> {
     console.log(`Channel: ${channelId} (${channelName})`);
 
     // custom script to run
-    const scriptInput = core.getInput('script', { required: false });
+    const scriptInput = core.getInput('script');
     const scripts = parseScript(scriptInput);
     console.log(`Script:`);
     scripts.forEach(async (script: string) => {
@@ -184,7 +184,7 @@ async function run(): Promise<void> {
     });
     console.log(`::endgroup::`);
 
-    const retryCount: number = parseInt(core.getInput('retry-count', { required: true }) || '3', 10);
+    const retryCount: number = parseInt(core.getInput('retry-count', { required: true }));
     console.log(`Retry count: ${retryCount}`);
 
     // install SDK
