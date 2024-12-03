@@ -1,3 +1,4 @@
+import * as core from '@actions/core';
 export async function execWithRetry(fn: () => Promise<number>, retryCount: number): Promise<number> {
   let attempt = 0;
   let result = 1;
@@ -7,6 +8,7 @@ export async function execWithRetry(fn: () => Promise<number>, retryCount: numbe
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
     result = await fn();
+    core.info(`Attempt ${attempt} completed with exit code ${result}`);
     attempt++;
   }
   return result;
