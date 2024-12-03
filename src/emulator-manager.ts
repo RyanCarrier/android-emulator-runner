@@ -36,8 +36,14 @@ export async function launchEmulator(
       console.log(`Creating AVD.`);
       // Don't believe this ever failed, but it seems like a strong candidate for failure...
       const result = await execWithRetry(
-        () => exec.exec(
-          `sh -c \\"echo no | avdmanager create avd --force -n "${avdName}" --abi '${target}/${arch}' --package 'system-images;android-${apiLevel};${target};${arch}' ${profileOption} ${sdcardPathOrSizeOption}"`), retryCount);
+        () =>
+          exec.exec(
+            `sh -c \\"echo no | avdmanager create avd --force -n "${avdName}" --abi '${target}/${arch}' --package 'system-images;android-${apiLevel};${target};${arch}' ${profileOption} ${sdcardPathOrSizeOption}"`
+          ),
+
+        retryCount
+      );
+
       if (result !== 0) {
         throw new Error('Failed to create AVD.');
       }
@@ -82,7 +88,11 @@ export async function launchEmulator(
               }
             },
           },
-        }), retryCount);
+        }),
+
+      retryCount
+    );
+
     if (result !== 0) {
       throw new Error('Failed to create AVD.');
     }
@@ -107,8 +117,6 @@ export async function launchEmulator(
     console.log(`::endgroup::`);
   }
 }
-
-
 
 /**
  * Kills the running emulator on the default port.

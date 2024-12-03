@@ -168,7 +168,7 @@ async function run() {
     console.log(`Channel: ${channelId} (${channelName})`);
 
     // custom script to run
-    const scriptInput = core.getInput('script', { required: true });
+    const scriptInput = core.getInput('script', { required: false });
     const scripts = parseScript(scriptInput);
     console.log(`Script:`);
     scripts.forEach(async (script: string) => {
