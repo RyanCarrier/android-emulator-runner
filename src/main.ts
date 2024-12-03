@@ -234,8 +234,8 @@ async function run() {
     }
 
     if (scripts.length === 0) {
-      console.log('No custom script to run. Be sure to shut down the emulator in your script.');
-      console.log(`(adb -s emulator-${port} emu kill)`);
+      console.log('No custom script to run.');
+      return;
     }
 
     // execute the custom script
