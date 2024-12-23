@@ -80,7 +80,7 @@ export async function launchEmulator(
     console.log('Starting emulator.');
     let xvfbPre = '';
     if (xvfb) {
-      xvfbPre = 'xvfb-run -a -e xvfb-run.log --server-args="-screen 0 1280x1024x24" ';
+      xvfbPre = `xvfb-run -a -e xvfb-run.log --server-args="-screen 0 1280x1024x24" `;
     }
 
     const result = await execWithRetry(
