@@ -80,7 +80,7 @@ export async function launchEmulator(
     console.log('Starting emulator.');
     let cmd = `sh -c \\"${process.env.ANDROID_HOME}/emulator/emulator -port ${port} -avd "${avdName}" ${emulatorOptions} &"`;
     if (xvfb) {
-      cmd = `sh -c\\"xvfb-run -a -e xvfb-run.log --server-args='-screen 0 1280x1024x24' ${process.env.ANDROID_HOME}/emulator/emulator -port ${port} -avd '${avdName}' ${emulatorOptions} &"`;
+      cmd = `sh -c \\"xvfb-run -a -e xvfb-run.log --server-args='-screen 0 1280x1024x24' ${process.env.ANDROID_HOME}/emulator/emulator -port ${port} -avd '${avdName}' ${emulatorOptions} &"`;
     }
     console.log(`Running command:\n${cmd}`);
 
