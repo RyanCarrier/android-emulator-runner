@@ -77,7 +77,7 @@ export async function installAndroidSdk(
       await io.rmRF('emulator.zip');
     }
     console.log('Installing system images.');
-    await execWithRetry(() => exec.exec(`sh -c \\"sdkmanager --install 'system-images;android-${apiLevel};${target};${arch}' --channel=${channelId} > /dev/null"`), retryCount);
+    await execWithRetry(() => exec.exec(`sh -c \\"sdkmanager --install 'system-images;android-${apiLevel};${target};${arch}' --channel=${channelId} > android-system-images.log"`), retryCount);
 
     if (ndkVersion) {
       console.log(`Installing NDK ${ndkVersion}.`);
