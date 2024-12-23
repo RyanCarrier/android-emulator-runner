@@ -24,6 +24,7 @@ export async function launchEmulator(
   disableSpellChecker: boolean,
   disableLinuxHardwareAcceleration: boolean,
   enableHardwareKeyboard: boolean,
+  xvfb: boolean,
   retryCount: number
 ): Promise<void> {
   try {
@@ -77,10 +78,14 @@ export async function launchEmulator(
 
     // start emulator
     console.log('Starting emulator.');
+    let xvfbPre = '';
+    if (xvfb) {
+      xvfbPre = 'xvfb-run -a -e xvfb-run.log --server-args="-screen 0 1280x1024x24" ';
+    }
 
     const result = await execWithRetry(
       () =>
-        exec.exec(`sh -c \\"${process.env.ANDROID_HOME}/emulator/emulator -port ${port} -avd "${avdName}" ${emulatorOptions} &"`, [], {
+        exec.exec(`sh -c \\${xvfbPre}"${process.env.ANDROID_HOME}/emulator/emulator -port ${port} -avd "${avdName}" ${emulatorOptions} &"`, [], {
           listeners: {
             stderr: (data: Buffer) => {
               if (data.toString().includes('invalid command-line parameter')) {

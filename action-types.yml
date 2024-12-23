@@ -64,6 +64,8 @@ inputs:
       - beta
       - dev
       - canary
+  xvfb:
+    type: boolean
   script:
     type: string
   pre-emulator-launch-script:

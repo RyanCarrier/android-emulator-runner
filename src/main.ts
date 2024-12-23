@@ -186,6 +186,8 @@ async function run(): Promise<void> {
 
     const retryCount: number = parseInt(core.getInput('retry-count', { required: true }));
     console.log(`Retry count: ${retryCount}`);
+    // xvfb
+    const xvfb: boolean = core.getInput('xvfb', { required: true }) === 'true';
 
     // install SDK
     await installAndroidSdk(apiLevel, target, arch, channelId, emulatorBuild, ndkVersion, cmakeVersion, retryCount);
@@ -228,6 +230,7 @@ async function run(): Promise<void> {
         disableSpellchecker,
         disableLinuxHardwareAcceleration,
         enableHardwareKeyboard,
+        xvfb,
         retryCount
       );
     } catch (error) {

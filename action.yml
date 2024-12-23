@@ -65,6 +65,9 @@ inputs:
   channel:
     description: "Channel to download the SDK components from - `stable`, `beta`, `dev`, `canary`"
     default: "stable"
+  xvfb:
+    description: "whether to run the emulator in a virtual framebuffer - `true` or `false`"
+    default: "false"
   script:
     description: "custom script to run - e.g. `./gradlew connectedCheck`"
   pre-emulator-launch-script:
