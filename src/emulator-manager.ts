@@ -78,12 +78,10 @@ export async function launchEmulator(
 
     // start emulator
     console.log('Starting emulator.');
-    let xvfbPre = '';
-    let cmd = `"${process.env.ANDROID_HOME}/emulator/emulator -port ${port} -avd "${avdName}" ${emulatorOptions} &"`;
+    let cmd = `sh -c \\"${process.env.ANDROID_HOME}/emulator/emulator -port ${port} -avd "${avdName}" ${emulatorOptions} &"`;
     if (xvfb) {
-      cmd = `xvfb-run -a -e xvfb-run.log --server-args="-screen 0 1280x1024x24" ${cmd}`;
+      cmd = `sh -c\\"xvfb-run -a -e xvfb-run.log --server-args='-screen 0 1280x1024x24' ${process.env.ANDROID_HOME}/emulator/emulator -port ${port} -avd '${avdName}' ${emulatorOptions} &"`;
     }
-    cmd = `sh -c \\${cmd}`;
     console.log(`Running command:\n${cmd}`);
 
     const result = await execWithRetry(
