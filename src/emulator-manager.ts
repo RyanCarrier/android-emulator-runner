@@ -84,27 +84,32 @@ export async function launchEmulator(
     }
     console.log(`Running command:\n${cmd}`);
 
-    const result = await execWithRetry(
-      () =>
-        exec.exec(cmd, [], {
-          listeners: {
-            stderr: (data: Buffer) => {
-              if (data.toString().includes('invalid command-line parameter')) {
-                throw new Error(data.toString());
-              }
+    const waitForBootResult = await execWithRetry(async () => {
+      var result = await execWithRetry(
+        () =>
+          exec.exec(cmd, [], {
+            listeners: {
+              stderr: (data: Buffer) => {
+                if (data.toString().includes('invalid command-line parameter')) {
+                  throw new Error(data.toString());
+                }
+              },
             },
-          },
-        }),
+          }),
 
-      retryCount
-    );
+        retryCount
+      );
+      if (result !== 0) {
+        throw new Error('Failed to start AVD.');
+      }
+      return await waitForDevice(port, emulatorBootTimeout);
+    }, retryCount);
 
-    if (result !== 0) {
-      throw new Error('Failed to create AVD.');
+    if (waitForBootResult !== 0) {
+      throw new Error('Failed to boot AVD.');
     }
 
     // wait for emulator to complete booting
-    await waitForDevice(port, emulatorBootTimeout);
     await adb(port, `shell input keyevent 82`);
 
     if (disableAnimations) {
@@ -145,7 +150,7 @@ async function adb(port: number, command: string): Promise<number> {
 /**
  * Wait for emulator to boot.
  */
-async function waitForDevice(port: number, emulatorBootTimeout: number): Promise<void> {
+async function waitForDevice(port: number, emulatorBootTimeout: number): Promise<number> {
   let booted = false;
   let attempts = 0;
   const retryInterval = 2; // retry every 2 seconds
@@ -172,10 +177,13 @@ async function waitForDevice(port: number, emulatorBootTimeout: number): Promise
     if (attempts < maxAttempts) {
       await delay(retryInterval * 1000);
     } else {
-      throw new Error(`Timeout waiting for emulator to boot.`);
+      console.log(`Timeout waiting for emulator to boot.`);
+      return 1;
+      // throw new Error(`Timeout waiting for emulator to boot.`);
     }
     attempts++;
   }
+  return 0;
 }
 
 function delay(ms: number) {
