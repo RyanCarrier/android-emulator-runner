@@ -1,4 +1,5 @@
 import * as exec from '@actions/exec';
+import * as core from '@actions/core';
 import * as fs from 'fs';
 import { execWithRetry } from './retry';
 
@@ -100,13 +101,16 @@ export async function launchEmulator(
         retryCount
       );
       if (result !== 0) {
+        //pkill qemu-system-x86_64
+        var pkillResult = await exec.exec(`pkill qemu-system-x86_64`);
+        console.log(`pkill qemu-system-x86_64 result: ${pkillResult}`);
         throw new Error('Failed to start AVD.');
       }
       return await waitForDevice(port, emulatorBootTimeout);
     }, retryCount);
 
     if (waitForBootResult !== 0) {
-      throw new Error('Failed to boot AVD.');
+      core.setFailed('Failed to boot AVD.');
     }
 
     // wait for emulator to complete booting
